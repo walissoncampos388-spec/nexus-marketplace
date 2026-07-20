@@ -9,11 +9,35 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. IDENTIDADE VISUAL E CUSTOMIZAÇÃO DE DESIGN (CSS Premium e Cabeçalho Fixo)
+# 2. IDENTIDADE VISUAL E ESTRUTURA FIXA DO HEADER (CSS Avançado)
 st.markdown("""
     <style>
-    /* Estilização geral de fundo e fontes */
+    /* Estilização geral de fundo */
     .main { background-color: #fafafa; }
+    
+    /* BLOCO EXTRAORDINÁRIO: Trava o cabeçalho no topo e permite rolagem por baixo */
+    [data-testid="stHeader"] {
+        z-index: 999;
+    }
+    
+    .header-fixo {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        z-index: 999999;
+        border-bottom: 1px solid #eaeaea;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        padding-bottom: 10px;
+    }
+    
+    /* Compensação de espaço para o conteúdo não começar atrás do cabeçalho */
+    .espacamento-conteudo {
+        margin-top: 140px;
+    }
     
     /* Customização dos botões pretos premium (Estilo Zara / Dafiti) */
     div.stButton > button:first-child {
@@ -68,36 +92,39 @@ if 'cupom_aplicado' not in st.session_state:
 if 'desconto_porcentagem' not in st.session_state:
     st.session_state.desconto_porcentagem = 0.0
 
-# 4. CONTAINER FIXO DO TOPO (Garante que o cabeçalho não suma na rolagem)
-with st.container(border=False):
-    # Barra de avisos superior integrada ao topo fixo
-    st.markdown(
-        '<div style="background: linear-gradient(90deg, #000000 0%, #1a1a1a 100%); color: white; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; letter-spacing: 1px;">'
-        '⚡ LOGÍSTICA EXPRESSA DISPONÍVEL • 10% OFF EXTRA NO PIX COM O CUPOM: <span style="color: #facc15; font-weight: 800;">NEXUS10</span>'
-        '</div>', 
-        unsafe_allow_html=True
-    )
-    st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+# 4. CRIAÇÃO DO CABEÇALHO TOTALMENTE FIXO
+# Renderiza a estrutura HTML que prende os elementos no topo da tela
+st.markdown("""
+    <div class="header-fixo">
+        <div style="background: linear-gradient(90deg, #000000 0%, #1a1a1a 100%); color: white; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; letter-spacing: 1px;">
+            ⚡ LOGÍSTICA EXPRESSA DISPONÍVEL • 10% OFF EXTRA NO PIX COM O CUPOM: <span style="color: #facc15; font-weight: 800;">NEXUS10</span>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
+# Para manter os elementos nativos do Streamlit alinhados dentro da área fixa do topo
+container_topo = st.container()
+with container_topo:
+    st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
     
-    # Linha 1: Nome NEXUS e Sacola lado a lado nas extremidades
+    # Linha 1: Logo e Sacola nas Extremidades
     col_logo, col_sacola = st.columns([5, 5])
-    
     with col_logo:
-        st.markdown("<h1 style='margin:0; font-weight:900; letter-spacing:-2px; line-height:1; font-size: 28px;'>NEXUS <span style='font-size:10px; font-weight:700; background-color:#000; color:#fff; padding:3px 8px; border-radius:4px; vertical-align:middle; margin-left:5px;'>MARKETPLACE</span></h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='margin:0; font-weight:900; letter-spacing:-2px; line-height:1; font-size: 28px; color: black;'>NEXUS <span style='font-size:10px; font-weight:700; background-color:#000; color:#fff; padding:3px 8px; border-radius:4px; vertical-align:middle; margin-left:5px;'>MARKETPLACE</span></h1>", unsafe_allow_html=True)
         
     with col_sacola:
         total_itens_sacola = len(st.session_state.carrinho)
-        st.markdown(f"<div style='text-align:right; font-weight:800; font-size:16px; margin-top:2px;'>🛒 Sacola <span style='background-color:#ff4b4b; color:white; padding:2px 8px; border-radius:20px; font-size:12px;'>{total_itens_sacola}</span></div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='text-align:right; font-weight:800; font-size:16px; margin-top:2px; color: black;'>🛒 Sacola <span style='background-color:#ff4b4b; color:white; padding:2px 8px; border-radius:20px; font-size:12px;'>{total_itens_sacola}</span></div>", unsafe_allow_html=True)
     
-    st.markdown("<div style='margin-top: 8px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
     
-    # Linha 2: Caixa de pesquisa centralizada logo abaixo do nome e da sacola
+    # Linha 2: Caixa de pesquisa fixa abaixo
     busca_query = st.text_input("Buscar", placeholder="O que você está procurando hoje? Ex: Jeans, Premium, Camiseta...", label_visibility="collapsed")
-    
-    st.markdown("<hr style='margin: 12px 0 5px 0; border-top: 1px solid #eee;'/>", unsafe_allow_html=True)
 
+# 5. INÍCIO DO CONTEÚDO ROLÁVEL (Aplicando a margem de compensação)
+st.markdown('<div class="espacamento-conteudo"></div>', unsafe_allow_html=True)
 
-# 5. BANCO DE DADOS DE PRODUTOS SIMULADO
+# BANCO DE DADOS DE PRODUTOS SIMULADO
 banco_produtos = [
     {
         "id": 101, "nome": "Calça Denim Premium Slim Fit", "preco": 119.90, "preco_antigo": 199.90, "categoria": "Jeans",
