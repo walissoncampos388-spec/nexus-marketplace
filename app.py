@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# 2. IDENTIDADE VISUAL E CUSTOMIZAÇÃO DE DESIGN (CSS Premium)
+# 2. IDENTIDADE VISUAL E CUSTOMIZAÇÃO DE DESIGN (CSS Premium e Cabeçalho Fixo)
 st.markdown("""
     <style>
     /* Estilização geral de fundo e fontes */
@@ -60,15 +60,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 3. BANNER DE AVISOS DINÂMICOS (Gatilhos de Urgência)
-st.markdown(
-    '<div style="background: linear-gradient(90deg, #000000 0%, #1a1a1a 100%); color: white; text-align: center; padding: 8px; font-size: 12px; font-weight: 600; letter-spacing: 1px;">'
-    '⚡ LOGÍSTICA EXPRESSA DISPONÍVEL • 10% OFF EXTRA NO PIX COM O CUPOM: <span style="color: #facc15; font-weight: 800;">NEXUS10</span>'
-    '</div>', 
-    unsafe_allow_html=True
-)
-
-# 4. INICIALIZAÇÃO DE ESTADOS DA SESSÃO (Gerenciamento de Dados do Usuário)
+# 3. INICIALIZAÇÃO DE ESTADOS DA SESSÃO
 if 'carrinho' not in st.session_state:
     st.session_state.carrinho = []
 if 'cupom_aplicado' not in st.session_state:
@@ -76,23 +68,36 @@ if 'cupom_aplicado' not in st.session_state:
 if 'desconto_porcentagem' not in st.session_state:
     st.session_state.desconto_porcentagem = 0.0
 
-# 5. CABEÇALHO / HEADER DA PLATAFORMA
-st.markdown("<br>", unsafe_allow_html=True)
-col_head_logo, col_head_busca, col_head_cart = st.columns([3, 5, 2])
-
-with col_head_logo:
-    st.markdown("<h1 style='margin:0; font-weight:900; letter-spacing:-2px; line-height:1;'>NEXUS <span style='font-size:10px; font-weight:700; background-color:#000; color:#fff; padding:3px 8px; border-radius:4px; vertical-align:middle; margin-left:5px;'>MARKETPLACE</span></h1>", unsafe_allow_html=True)
-
-with col_head_busca:
+# 4. CONTAINER FIXO DO TOPO (Garante que o cabeçalho não suma na rolagem)
+with st.container(border=False):
+    # Barra de avisos superior integrada ao topo fixo
+    st.markdown(
+        '<div style="background: linear-gradient(90deg, #000000 0%, #1a1a1a 100%); color: white; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; letter-spacing: 1px;">'
+        '⚡ LOGÍSTICA EXPRESSA DISPONÍVEL • 10% OFF EXTRA NO PIX COM O CUPOM: <span style="color: #facc15; font-weight: 800;">NEXUS10</span>'
+        '</div>', 
+        unsafe_allow_html=True
+    )
+    st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+    
+    # Linha 1: Nome NEXUS e Sacola lado a lado nas extremidades
+    col_logo, col_sacola = st.columns([5, 5])
+    
+    with col_logo:
+        st.markdown("<h1 style='margin:0; font-weight:900; letter-spacing:-2px; line-height:1; font-size: 28px;'>NEXUS <span style='font-size:10px; font-weight:700; background-color:#000; color:#fff; padding:3px 8px; border-radius:4px; vertical-align:middle; margin-left:5px;'>MARKETPLACE</span></h1>", unsafe_allow_html=True)
+        
+    with col_sacola:
+        total_itens_sacola = len(st.session_state.carrinho)
+        st.markdown(f"<div style='text-align:right; font-weight:800; font-size:16px; margin-top:2px;'>🛒 Sacola <span style='background-color:#ff4b4b; color:white; padding:2px 8px; border-radius:20px; font-size:12px;'>{total_itens_sacola}</span></div>", unsafe_allow_html=True)
+    
+    st.markdown("<div style='margin-top: 8px;'></div>", unsafe_allow_html=True)
+    
+    # Linha 2: Caixa de pesquisa centralizada logo abaixo do nome e da sacola
     busca_query = st.text_input("Buscar", placeholder="O que você está procurando hoje? Ex: Jeans, Premium, Camiseta...", label_visibility="collapsed")
+    
+    st.markdown("<hr style='margin: 12px 0 5px 0; border-top: 1px solid #eee;'/>", unsafe_allow_html=True)
 
-with col_head_cart:
-    total_itens_sacola = len(st.session_state.carrinho)
-    st.markdown(f"<div style='text-align:right; font-weight:800; font-size:16px; margin-top:5px;'>🛒 Sacola <span style='background-color:#ff4b4b; color:white; padding:2px 8px; border-radius:20px; font-size:12px;'>{total_itens_sacola}</span></div>", unsafe_allow_html=True)
 
-st.markdown("<hr style='margin: 15px 0;'/>", unsafe_allow_html=True)
-
-# 6. BANCO DE DADOS DE PRODUTOS SIMULADO (Foco em Alta Qualidade)
+# 5. BANCO DE DADOS DE PRODUTOS SIMULADO
 banco_produtos = [
     {
         "id": 101, "nome": "Calça Denim Premium Slim Fit", "preco": 119.90, "preco_antigo": 199.90, "categoria": "Jeans",
@@ -116,7 +121,7 @@ banco_produtos = [
     }
 ]
 
-# 7. FILTROS AVANÇADOS NA SIDEBAR (Painel Administrativo/Busca Comercial)
+# 6. FILTROS AVANÇADOS NA SIDEBAR
 st.sidebar.markdown("### 🔍 Central de Filtros")
 filtro_categoria = st.sidebar.radio("Selecione a Linha:", ["Todas as Categorias", "Jeans", "Básicos"])
 filtro_preco = st.sidebar.slider("Filtrar até que valor? (R$)", 50, 300, 300)
@@ -138,20 +143,18 @@ for p in banco_produtos:
         continue
     produtos_exibidos.append(p)
 
-# 8. CONTEÚDO PRINCIPAL: VITRINE DE PRODUTOS
+# 7. VITRINE DE PRODUTOS
 st.markdown("### 🚀 Vitrine Principal de Lançamentos")
 
 if not produtos_exibidos:
     st.info("Nenhum produto corresponde aos filtros aplicados. Tente ajustar a busca na barra superior!")
 else:
-    # Criação de grid fluido em 4 colunas dinâmicas
     colunas_vitrine = st.columns(4)
     
     for indice, prod in enumerate(produtos_exibidos):
         coluna_atual = colunas_vitrine[indice % 4]
         
         with coluna_atual:
-            # Envelopamento visual com estilo card
             st.markdown(f"<div class='card-produto'>", unsafe_allow_html=True)
             st.image(prod["imagem"], use_container_width=True)
             st.markdown(f"<span class='badge-oferta'>{prod['tag']}</span>", unsafe_allow_html=True)
@@ -159,11 +162,9 @@ else:
             st.markdown(f"<span style='color:#a0a0a0; text-decoration:line-through; font-size:12px;'>De: R$ {prod['preco_antigo']:.2f}</span>", unsafe_allow_html=True)
             st.markdown(f"<h3 style='margin:0 0 10px 0; color:#000000; font-weight:800;'>Por: R$ {prod['preco']:.2f}</h3>", unsafe_allow_html=True)
             
-            # ATRIBUTOS DO PRODUTO (O Grande Diferencial de UX)
             cor_escolhida = st.selectbox("Cor:", prod["cores"], key=f"cor_{prod['id']}_{indice}")
             tamanho_escolhido = st.select_slider("Tamanho:", options=prod["tamanhos"], key=f"tam_{prod['id']}_{indice}")
             
-            # Ação de Compra
             if st.button("Adicionar à Sacola", key=f"btn_add_{prod['id']}_{indice}"):
                 item_carrinho = {
                     "id": prod["id"],
@@ -179,7 +180,7 @@ else:
                 
             st.markdown("</div>", unsafe_allow_html=True)
 
-# 9. SISTEMA DE CHECKOUT E PROCESSAMENTO (Abaixo da Vitrine)
+# 8. SISTEMA DE CHECKOUT E PROCESSAMENTO
 if len(st.session_state.carrinho) > 0:
     st.markdown("<br><hr style='border:1px solid #000;'/><br>", unsafe_allow_html=True)
     st.markdown("## 💳 Finalização de Compra Avançada")
@@ -188,7 +189,6 @@ if len(st.session_state.carrinho) > 0:
     
     with col_checkout_itens:
         st.markdown("### 1. Itens Selecionados na Sacola")
-        # Listagem elegante dos itens adicionados
         for idx_item, item in enumerate(st.session_state.carrinho):
             c_item_nome, c_item_detalhe, c_item_preco, c_item_acao = st.columns([4, 3, 2, 1])
             with c_item_nome:
@@ -207,7 +207,6 @@ if len(st.session_state.carrinho) > 0:
         st.markdown("### 2. Resumo Financeiro")
         subtotal_geral = sum([i['preco'] for i in st.session_state.carrinho])
         
-        # Módulo Interativo de Cupons
         cupom_digitado = st.text_input("Tem um cupom de desconto?", placeholder="Digite aqui...").strip().upper()
         if cupom_digitado == "NEXUS10":
             st.session_state.cupom_aplicado = "NEXUS10"
@@ -221,19 +220,16 @@ if len(st.session_state.carrinho) > 0:
         valor_desconto = subtotal_geral * st.session_state.desconto_porcentagem
         total_final = subtotal_geral - valor_desconto
         
-        # Exibição matemática clara dos valores
         st.write(f"Subtotal dos Produtos: R$ {subtotal_geral:.2f}")
         if valor_desconto > 0:
             st.write(f"(-) Desconto Cupom: R$ {valor_desconto:.2f}")
         st.markdown(f"### Valor Total: <span style='color:#000;'>R$ {total_final:.2f}</span>", unsafe_allow_html=True)
         
-        # Disparo final da transação
         if st.button("🔥 Confirmar e Gerar Pedido"):
             with st.spinner("Conectando ao gateway de pagamento e reservando estoque..."):
                 time.sleep(1.8)
             st.balloons()
-            st.success("🎉 Pedido recebido com sucesso! O código PIX de pagamento foi enviado ao seu sistema.")
-            # Limpa carrinho após a compra
+            st.success("🎉 Pedido recebido com sucesso!")
             st.session_state.carrinho = []
             st.session_state.cupom_aplicado = None
             st.session_state.desconto_porcentagem = 0.0
